@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Retrofit Post</string>
+    <string name="enter_page_number">Enter Page Number</string>
+    <string name="enter_user_id">Enter User ID</string>
+    <string name="str_please_wait">Please Wait</string>
+    <string name="str_please_try_again">Please Try Again</string>
+</resources>
