@@ -21,6 +21,7 @@ public class DataResponse {
     @Expose
     private List<Datum> data = null;
 
+
     public String getStatus() {
         return status;
     }
@@ -155,7 +156,7 @@ public class DataResponse {
         private String redeem;
         @SerializedName("Status")
         @Expose
-        private String status;
+        private String statusData;
         @SerializedName("regdate")
         @Expose
         private String regdate;
@@ -252,6 +253,16 @@ public class DataResponse {
         @SerializedName("review_count")
         @Expose
         private String reviewCount;
+
+        private int orderId;
+
+        public int getOrderId() {
+            return orderId;
+        }
+
+        public void setOrderId(int orderId) {
+            this.orderId = orderId;
+        }
 
         public Integer getSmartLot() {
             return smartLot;
@@ -533,12 +544,12 @@ public class DataResponse {
             this.redeem = redeem;
         }
 
-        public String getStatus() {
-            return status;
+        public String getStatusData() {
+            return statusData;
         }
 
-        public void setStatus(String status) {
-            this.status = status;
+        public void setStatusData(String statusData) {
+            this.statusData = statusData;
         }
 
         public String getRegdate() {

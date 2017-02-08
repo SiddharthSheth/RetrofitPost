@@ -3,6 +3,7 @@ package ln.retrofitpost.activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -10,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.List;
 
 import ln.retrofitpost.R;
 import ln.retrofitpost.api.ApiFactory;
+import ln.retrofitpost.dbhelper.DatabaseHandler.DatabaseHandler;
 import ln.retrofitpost.request.DataRequest;
 import ln.retrofitpost.response.DataResponse;
 import ln.retrofitpost.service.DataService;
@@ -30,8 +33,12 @@ public class DashboardActivty extends AppCompatActivity implements AdapterView.O
     private Spinner spCategory;
     private EditText edUserId, edPageNumber;
     private Button btnGetData;
+    private TextView txtTxnId, txtPhone, txtQuantity, txtTotalAmount;
     private ProgressDialog mProgressDialog;
-    String data;
+    private CardView cvData;
+    String category;
+    DatabaseHandler databaseHandler;
+    ArrayList<DataResponse.Datum> datumArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,14 +47,17 @@ public class DashboardActivty extends AppCompatActivity implements AdapterView.O
 
         initViews();
 
+        cvData.setVisibility(View.INVISIBLE);
+        databaseHandler = new DatabaseHandler(this);
+
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage(getString(R.string.str_please_wait));
 
         List<String> categories = new ArrayList<String>();
         categories.add("Select One");
-        categories.add("Current");
-        categories.add("Past");
-        categories.add("Future");
+        categories.add("current");
+        categories.add("past");
+        categories.add("future");
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories);
 
@@ -62,6 +72,11 @@ public class DashboardActivty extends AppCompatActivity implements AdapterView.O
         edUserId = (EditText) findViewById(R.id.ed_userid);
         edPageNumber = (EditText) findViewById(R.id.ed_pagenumber);
         btnGetData = (Button) findViewById(R.id.btn_getdata);
+        txtTxnId = (TextView) findViewById(R.id.txt_txnid);
+        txtPhone = (TextView) findViewById(R.id.txt_phone);
+        txtTotalAmount = (TextView) findViewById(R.id.txt_totalamount);
+        txtQuantity = (TextView) findViewById(R.id.txt_quantity);
+        cvData = (CardView) findViewById(R.id.cv_data);
         spCategory.setOnItemSelectedListener(this);
         btnGetData.setOnClickListener(this);
     }
@@ -73,9 +88,9 @@ public class DashboardActivty extends AppCompatActivity implements AdapterView.O
 
         DataRequest.Data data = new DataRequest().new Data();
 
-        data.setPage(edPageNumber.getText().toString());
+        data.setPages(edPageNumber.getText().toString());
 
-        data.setStatus(String.valueOf(1));
+        data.setStatus(category);
 
         data.setUserId(edUserId.getText().toString());
 
@@ -85,7 +100,7 @@ public class DashboardActivty extends AppCompatActivity implements AdapterView.O
 
     }
 
-    private void makeWsCallForData(DataRequest dataRequest) {
+    private void makeWsCallForData(final DataRequest dataRequest) {
 
         DataService dataService = ApiFactory.createService(DataService.class);
 
@@ -98,17 +113,34 @@ public class DashboardActivty extends AppCompatActivity implements AdapterView.O
 
                 if (response.isSuccessful()) {
 
-                    showToast(response.body().getData().get(0).getTxnID());
+                    cvData.setVisibility(View.VISIBLE);
+
+                    databaseHandler.addOrder(response);
+
+                    int id = databaseHandler.getCount();
+
+                    Log.d("id",String.valueOf(id));
+
+                    datumArrayList = databaseHandler.getOrders(id);
+
+                    txtTxnId.setText(datumArrayList.get(0).getTxnID());
+
+                    txtPhone.setText(datumArrayList.get(0).getPhone());
+
+                    txtQuantity.setText(datumArrayList.get(0).getQuantity());
+
+                    txtTotalAmount.setText(datumArrayList.get(0).getTotalAmount());
 
                 } else {
 
+                    cvData.setVisibility(View.INVISIBLE);
                     showToast(getString(R.string.str_please_try_again));
                 }
             }
 
             @Override
             public void onFailure(Call<DataResponse> call, Throwable t) {
-                Log.d("error",t.toString());
+                cvData.setVisibility(View.INVISIBLE);
                 showToast("No Response");
                 mProgressDialog.dismiss();
             }
@@ -121,7 +153,7 @@ public class DashboardActivty extends AppCompatActivity implements AdapterView.O
         switch (view.getId()) {
             case R.id.btn_getdata:
 
-                getData(data);
+                getData(category);
 
                 break;
         }
@@ -131,7 +163,7 @@ public class DashboardActivty extends AppCompatActivity implements AdapterView.O
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-        data = spCategory.getSelectedItem().toString();
+        category = spCategory.getSelectedItem().toString();
 
 //        getData(data);
 

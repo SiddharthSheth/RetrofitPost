@@ -27,9 +27,9 @@ public class DataRequest {
         @SerializedName("status")
         @Expose
         private String status;
-        @SerializedName("page")
+        @SerializedName("pages")
         @Expose
-        private String page;
+        private String pages;
         @SerializedName("user_id")
         @Expose
         private String userId;
@@ -42,12 +42,12 @@ public class DataRequest {
             this.status = status;
         }
 
-        public String getPage() {
-            return page;
+        public String getPages() {
+            return pages;
         }
 
-        public void setPage(String page) {
-            this.page = page;
+        public void setPages(String pages) {
+            this.pages = pages;
         }
 
         public String getUserId() {
